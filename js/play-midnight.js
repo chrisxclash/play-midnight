@@ -189,6 +189,15 @@ var PlayMidnight = {
 	},
 
 	addSortOptions: function() {
+		var sortHtml = [
+			'<div id="recent-sort" class="tab-container">',
+			' <a class="header-tab-title selected" data-reason="0">All</a>',
+			' <a class="header-tab-title" data-reason="2">Added</a>',
+			' <a class="header-tab-title" data-reason="3">Played</a>',
+			' <a class="header-tab-title" data-reason="5">Created</a>',
+			'</div>',
+		].join('');
+
 		// Add a link directly to Recent, after the first "Listen Now" link
 		$('<a data-type="recent" class="nav-item-container tooltip" href="">Recent</a>')
 			.insertAfter('#nav_collections a:first-child');
@@ -196,18 +205,10 @@ var PlayMidnight = {
 		// Add sort links to the header
 		function toggleRecentUI() {
 			// Only add them if "Recent" string is present and we're not already in this view.
+			// Otherwise remove the UI completely.
 			if ( $(this).children('.tab-text:contains(Recent)').length
 				&& ! $(this).children('#recent-sort').length ) {
-				$(this).append([
-					'<div id="recent-sort">',
-						'<label><input type="radio" name="recent-sort" value="0" checked><span>All</span></label>',
-						'<label><input type="radio" name="recent-sort" value="2"><span>Added</span></label>',
-						'<label><input type="radio" name="recent-sort" value="3"><span>Played</span></label>',
-						'<label><input type="radio" name="recent-sort" value="5"><span>Created</span></label>',
-					'</div>'
-				].join(''));
-
-			// Otherwise remove the UI completely.
+				$(this).append(sortHtml);
 			} else {
 				$('#recent-sort').remove();
 			}
@@ -219,10 +220,13 @@ var PlayMidnight = {
 		$('#breadcrumbs').one('DOMSubtreeModified', toggleRecentUI);
 
 		// Filter toggling behavior
-		$('#breadcrumbs').on('click', 'input', function() {
-			var reason = parseInt($(this).val());
+		$('#breadcrumbs').on('click', 'a', function() {
+			var $this = $(this);
+			var reason = parseInt($this.data('reason'));
 			var selector = (reason == 0 ? '*' : '[data-reason=' + reason + ']');
 			var $cards = $('#music-content .card');
+
+			$this.addClass('selected').siblings().removeClass('selected');
 			$cards.filter(selector).show();
 			$cards.not(selector).hide();
 		});
