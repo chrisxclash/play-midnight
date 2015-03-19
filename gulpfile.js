@@ -17,7 +17,7 @@
 		var style = $.sass('scss/', { style: 'compact', sourcemap: false });
 
 		return style
-			.on('error', function (error) { console.error('Error', err.message); })
+			.on('error', function (error) { console.error('Error', error.message); })
 			.pipe($.autoprefixer({ browsers: ['last 2 version'] }))
 			.pipe($.if(argv.prod, $.minifycss()))
 			.pipe(gulp.dest('css'))
