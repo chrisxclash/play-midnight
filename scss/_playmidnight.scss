@@ -228,15 +228,19 @@ body {
 			color: $accent;
 		}
 	}
-
-	img[src$="default_artist_art.png"],
-	img[src$="default_album_art_big_card.png"],
-	img[src$="default_album_art_song_row.png"],
-	img[src$="default_album_med.png"] {
-		filter: invert(100%);
-	}
 }
 
+img[src$="default_artist_art.png"],
+img[src$="default_album_art_big_card.png"],
+img[src$="default_album_art_song_row.png"],
+img[src$="default_album_med.png"],
+.queue-details .empty-image {
+  filter: invert(100%);
+}
+
+.queue-details .fade {
+  z-index: 1;
+}
 
 // Sidebar/Nav
 .nav-item-container {
