@@ -106,6 +106,7 @@ var PlayMidnight = (function (_) {
     loadOptions(function () {
       config();
       injectStyle();
+      fixSharedStyleElement();
 
       window.addEventListener('load', function () {
         PM.Options.create();
@@ -413,8 +414,58 @@ var PlayMidnight = (function (_) {
     _userOptions = _defaultOptions;
   }
 
+  function ready(callback)
+  {
+      // in case the document is already rendered
+      if (document.readyState !== 'loading')
+      {
+          callback();
+      }
+      // modern browsers
+      else if (document.addEventListener)
+      {
+          document.addEventListener('DOMContentLoaded', callback);
+      }
+      // IE <= 8
+      else
+      {
+          document.attachEvent('onreadystatechange', function()
+          {
+              if (document.readyState === 'complete')
+              {
+                  callback();
+              }
+          });
+      }
+  }
 
+  function getSharedStyleElement()
+  {
+      var styleElems = document.getElementsByTagName('style');
 
+      for (var i = 0; i < styleElems.length; i++) {
+          if (styleElems[i].getAttribute('include') === 'sj-shared-styles') {
+              return styleElems[i];
+          }
+      }
+  }
+
+  function fixSharedStyleElement() {
+    ready(function() {
+      window.onload = function() {
+        var n = 0;
+        var accentColor = _userOptions.accent.color;
+        var styleElem = getSharedStyleElement();
+        var styleText = styleElem.innerHTML;
+        var newStyleText = styleText.replace(/\#ff5722/gi, function() {
+          ++n;
+          return accentColor;
+        });
+
+        styleElem.innerHTML = newStyleText;
+      };
+    });
+  }
 
   // Inject Stylesheet
   function injectStyle() {
