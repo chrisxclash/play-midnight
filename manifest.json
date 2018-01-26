@@ -1,4 +1,10 @@
 {
+  "applications": {
+    "gecko": {
+      "id": "firefox@playmidnight.com"
+    }
+  },
+
   "manifest_version": 2,
   "name": "Play Midnight for Google Play Music™",
   "short_name": "Play Midnight",

@@ -95,13 +95,13 @@ var PlayMidnightOptions = (function (_, PlayMidnight) {
 
 
   // Load Options Templates and Inject
-  function createOptions() {
-    _.inject(_templates, function () {
+  async function createOptions() {
+    _.inject(_templates, async function () {
       var userOptions = PlayMidnight.getUserOptions(),
         optionsGraph = PlayMidnight.getOptionsGraph(),
         optionsPage = _templates.optionsPage.element,
         optionsContainer = _templates.optionsPage.element.querySelector('section.options .options-container'),
-        frag = buildOptions(optionsGraph, userOptions),
+        frag = await buildOptions(optionsGraph, userOptions),
         items;
 
       optionsContainer.appendChild(frag);
@@ -159,7 +159,7 @@ var PlayMidnightOptions = (function (_, PlayMidnight) {
 
 
   // Build Options
-  function buildOptions(options, values) {
+  async function buildOptions(options, values) {
     var fragment, option, ele;
 
     fragment = document.createDocumentFragment();
@@ -169,17 +169,17 @@ var PlayMidnightOptions = (function (_, PlayMidnight) {
         option = options[key];
 
         if (option.type === 'section') {
-          ele = buildSection(key, option, values);
+          ele = await buildSection(key, option, values);
           fragment.appendChild(ele);
         }
 
         if (option.type === 'array') {
-          ele = buildArray(key, option, values);
+          ele = await buildArray(key, option, values);
           fragment.appendChild(ele);
         }
 
         if (option.type === 'boolean') {
-          ele = buildBoolean(key, option, values);
+          ele = await buildBoolean(key, option, values);
           fragment.appendChild(ele);
         }
 
@@ -199,13 +199,13 @@ var PlayMidnightOptions = (function (_, PlayMidnight) {
 
 
   // Build Section
-  function buildSection(key, option, values) {
+  async function buildSection(key, option, values) {
     var fragment = document.createDocumentFragment();
 
     var title = _.createElement('<h3 class="play-midnight-section-title"></h3>');
     title.innerText = option.title;
 
-    var content = buildOptions(option.options, values);
+    var content = await buildOptions(option.options, values);
 
     fragment.appendChild(title);
     fragment.appendChild(content);
@@ -224,7 +224,7 @@ var PlayMidnightOptions = (function (_, PlayMidnight) {
 
 
   // Build Array
-  function buildArray(key, option, values) {
+  async function buildArray(key, option, values) {
     var fragment = document.createDocumentFragment();
 
     var singleKey = option.single;
@@ -248,8 +248,8 @@ var PlayMidnightOptions = (function (_, PlayMidnight) {
     details.querySelector('.option-description').appendChild(description);
 
     if (option.createable === true) {
-      var button = _.createElement('<paper-button class="material-primary" role="button"><svg viewBox="0 0 24 24" height="100%" width="100%" preserveAspectRatio="xMidYMid meet" fit="" style="pointer-events: none; display: block;"><g><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></g></svg></paper-button>');
-      var form = buildForm(singleKey, option);
+      var button = await _.createPolymerElement('<paper-button class="material-primary" role="button"><svg viewBox="0 0 24 24" height="100%" width="100%" preserveAspectRatio="xMidYMid meet" fit="" style="pointer-events: none; display: block;"><g><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></g></svg></paper-button>');
+      var form = await buildForm(singleKey, option);
 
       button.addEventListener('click', function () {
         form.classList.toggle('visible');
@@ -345,7 +345,7 @@ var PlayMidnightOptions = (function (_, PlayMidnight) {
 
 
   // Build Form
-  function buildForm(key, option) {
+  async function buildForm(key, option) {
     var form = _.createElement('<form class="add-new" action="javascript:;"></form>');
     form.key = key;
 
@@ -356,7 +356,7 @@ var PlayMidnightOptions = (function (_, PlayMidnight) {
 
     for (var meta in singleOption) {
       if (singleOption.hasOwnProperty(meta)) {
-        var field = _.createElement('<div class="play-midnight-input"><paper-input label="" floatinglabel></paper-input></div>');
+        var field = await _.createPolymerElement('<div class="play-midnight-input"><paper-input label="" floatinglabel></paper-input></div>');
         var input = field.querySelector('paper-input');
         input.setAttribute('label', _.toTitleCase(meta));
         input.setAttribute('aria-label', _.toTitleCase(meta));
@@ -371,7 +371,7 @@ var PlayMidnightOptions = (function (_, PlayMidnight) {
       }
     }
 
-    var button = _.createElement('<div class="form-action"><paper-button class="material-primary" role="button" tabindex="0" no-focus=""></paper-button></div>');
+    var button = await _.createPolymerElement('<div class="form-action"><paper-button class="material-primary" role="button" tabindex="0" no-focus=""></paper-button></div>');
     button.querySelector('paper-button').innerText = 'Create ' + _.toTitleCase(option.single);
 
     button.addEventListener('click', function () {
@@ -455,10 +455,10 @@ var PlayMidnightOptions = (function (_, PlayMidnight) {
 
 
   // Build Boolean
-  function buildBoolean(key, option, values) {
+  async function buildBoolean(key, option, values) {
     var fragment = document.createDocumentFragment();
 
-    var details = _.createElement('<div class="play-midnight-option"><div class="option-info"><div class="option-name"></div><div class="option-description"></div></div><paper-toggle-button></paper-toggle-button></div>');
+    var details = await _.createPolymerElement('<div class="play-midnight-option"><div class="option-info"><div class="option-name"></div><div class="option-description"></div></div><paper-toggle-button></paper-toggle-button></div>');
     var title = document.createTextNode(option.title);
     var description = document.createTextNode(option.description);
     details.querySelector('.option-name').appendChild(title);

@@ -107,8 +107,8 @@ var PlayMidnight = (function (_) {
       config();
       injectStyle();
 
-      window.addEventListener('load', function () {
-        PM.Options.create();
+      window.addEventListener('load', async function () {
+        await PM.Options.create();
 
         updateFavicon();
 
@@ -256,9 +256,9 @@ var PlayMidnight = (function (_) {
 
   // Load User Options from Storage
   function loadOptions(cb) {
-    _.$http.get(_.browser.url('dist/options.json'))
+    _.$http.getJson(_.browser.url('dist/options.json'))
       .then(function (options) {
-        _optionsGraph = JSON.parse(options);
+        _optionsGraph = options;
         _defaultOptions = parseOptions(_optionsGraph);
 
         _.log('Default Options Loaded');

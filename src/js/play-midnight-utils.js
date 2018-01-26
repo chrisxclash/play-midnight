@@ -7,6 +7,7 @@ var PlayMidnightUtilities = (function (Browser) {
     browser: Browser, // Add Browser Save/Get/URL Tools
     callback: callback,
     createElement: createElement,
+    createPolymerElement: async html => createElement(html),
     empty: empty,
     equalObjects: equalObjects,
     garbage: garbage,
@@ -24,6 +25,13 @@ var PlayMidnightUtilities = (function (Browser) {
     verbose: verbose,
     versionCompare: versionCompare
   };
+
+  if (Browser.isFireFox()) {
+    const script = document.createElement('script');
+    script.textContent = createElementHelper.toString();
+    document.head.appendChild(script);
+    PMUtils.createPolymerElement = createPolymerElementFF;
+  }
 
   // Verbose Mode (console fun stuffs)
   var _verbose = false;
@@ -53,6 +61,48 @@ var PlayMidnightUtilities = (function (Browser) {
 
     temp.innerHTML = html;
     return temp.childNodes[0];
+  }
+
+
+  // createPolymerElementFF helper (injected into page)
+  function createElementHelper(id, html) {
+    var temp = document.createElement('div');
+    temp.id = id;
+    temp.style.display = 'none';
+    temp.innerHTML = html;
+    document.body.appendChild(temp);
+  }
+
+
+  // Creates a Polymer element from html string by injecting it into the page.
+  // Using document.createElement and Element#innerHTML from a WebExtension
+  // doesn't initialize Polymer elements due to privileged security context.
+  function createPolymerElementFF(html) {
+    const id = genUuid();
+    const script = `createElementHelper('${id}', \`${html.replace('\`', '\\\`')}\`);`;
+    const scriptElem = document.createElement('script');
+    scriptElem.textContent = script;
+    document.body.appendChild(scriptElem);
+    return new Promise(resolve => {
+      const interval = setInterval(() => {
+        const element = document.getElementById(id);
+        if (!element) {
+          return;
+        }
+        const child = element.childNodes[0];
+        document.body.removeChild(scriptElem);
+        document.body.removeChild(element);
+        clearInterval(interval);
+        resolve(child);
+      }, 10);
+    });
+  }
+
+
+  // Generates a random UUID
+  function genUuid() {
+    const S4 = () => (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
   }
 
 
@@ -111,36 +161,9 @@ var PlayMidnightUtilities = (function (Browser) {
 
   // Sample stub $http Utility
   function $http() {
-    var core = {
-      ajax: function (method, url, args) {
-        var promise = new Promise(function (resolve, reject) {
-          var client = new XMLHttpRequest();
-          var uri = url;
-
-          client.open(method, uri);
-          client.send();
-
-          client.onload = function () {
-            if (this.status === 200) {
-              resolve(this.response);
-            } else {
-              reject(this.statusText);
-            }
-          };
-
-          client.onerror = function () {
-            reject(this.statusText);
-          };
-        });
-
-        return promise;
-      }
-    };
-
     return {
-      'get': function (url) {
-        return core.ajax('GET', url);
-      }
+      'get': url => fetch(url).then(res => res.text()),
+      'getJson': url => fetch(url).then(res => res.json())
     };
   }
 

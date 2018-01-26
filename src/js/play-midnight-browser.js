@@ -1,4 +1,4 @@
-/* global self, chrome */
+/* global browser, chrome */
 var PlayMidnightBrowser = (function () {
   'use strict';
 
@@ -6,7 +6,7 @@ var PlayMidnightBrowser = (function () {
   var BR = {};
 
   // Get Browser
-  var _browser = 'chrome';
+  var _browser = typeof browser === 'undefined' ? 'chrome' : 'firefox';
 
   BR.isFireFox = function () {
     return _browser === 'firefox';
@@ -18,44 +18,25 @@ var PlayMidnightBrowser = (function () {
 
   // Save To Storage
   BR.save = function (data, cb) {
-    if (_browser === 'chrome') {
-      chrome.storage.sync.set(data, cb);
-    } else {
-      self.port.emit('save', data);
-      self.port.on('saved', cb);
-    }
+    chrome.storage.sync.set(data, cb);
   };
 
 
   // Get From Storage
   BR.get = function (data, cb) {
-    if (_browser === 'chrome') {
-      chrome.storage.sync.get(data, cb);
-    } else {
-      self.port.emit('retrieve', data);
-      self.port.on('retrieved', cb);
-    }
+    chrome.storage.sync.get(data, cb);
   };
 
 
   // Get Full URL
   BR.url = function (url) {
-    if (_browser === 'chrome') {
-      return chrome.extension.getURL(url);
-    } else {
-      url = url.replace(/^\//, '');
-      return self.options.pluginUrl + url;
-    }
+    return chrome.extension.getURL(url);
   };
 
 
   // Option Changed
   BR.changed = function (cb) {
-    if (_browser === 'chrome') {
-      return chrome.storage.onChanged.addListener(cb);
-    } else {
-      return;
-    }
+    return chrome.storage.onChanged.addListener(cb);
   };
 
 

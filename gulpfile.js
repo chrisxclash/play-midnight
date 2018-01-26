@@ -44,16 +44,16 @@
 		merged.queue(script);
 
 		merged.done()
-			.pipe($.jshint())
-			.pipe($.jshint.reporter('default'))
+			.pipe($.eslint())
+			.pipe($.eslint.format())
 			.pipe($.concat('play-midnight.js'))
 			.pipe($.uglify())
 			.pipe(gulp.dest('../Dist/Chrome/dist/js'));
 
 		// Background JS
 		gulp.src(['src/js/**/*.js', '!src/js/play-midnight*'])
-			.pipe($.jshint())
-			.pipe($.jshint.reporter('default'))
+			.pipe($.eslint())
+			.pipe($.eslint.format())
 			.pipe($.uglify())
 			.pipe(gulp.dest('../Dist/Chrome/dist/js'));
 
@@ -100,8 +100,8 @@
 		merged.queue(script);
 
 		return merged.done()
-			.pipe($.jshint())
-			.pipe($.jshint.reporter('default'))
+			.pipe($.eslint())
+			.pipe($.eslint.format())
 			.pipe($.concat('play-midnight.js'))
 			.pipe($.if(argv.prod, $.uglify()))
 			.pipe(gulp.dest('dist/js'))

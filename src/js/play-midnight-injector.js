@@ -6,13 +6,13 @@ var PlayMidnightInjector = (function (_, PM) {
   var PMInjector = {};
 
   // Load Options Templates and Inject
-  function loadTemplates(_temps, cb) {
+  async function loadTemplates(_temps, cb) {
     var promises = [];
 
     // Invalid Templates
     if (!_temps || typeof _temps !== 'object') {
       if (typeof cb === 'function') {
-        cb(_temps);
+        await cb(_temps);
       }
       return;
     }
@@ -33,44 +33,44 @@ var PlayMidnightInjector = (function (_, PM) {
     // No Templates had URLS
     if (!promises.length) {
       if (typeof cb === 'function') {
-        cb(_temps);
+        await cb(_temps);
       }
       return;
     }
 
     // Load ALL Templates before injecting
-    Promise.all(promises)
-      .then(function (templateHtml) {
+    await Promise.all(promises)
+      .then(async function (templateHtml) {
         // Populate Returned Templates
         var i = 0;
         for (var key in _temps) {
           if (_temps.hasOwnProperty(key)) {
             _temps[key].html = parseTemplate(templateHtml[i]) || '';
-            _temps[key].element = _.createElement(_temps[key].html) || document.createElement('div');
+            _temps[key].element = await _.createPolymerElement(_temps[key].html) || document.createElement('div');
             i++;
           }
         }
 
         if (typeof cb === 'function') {
-          cb(_temps);
+          await cb(_temps);
         }
       });
   }
 
 
   // Load Options Templates and Inject
-  function injectTemplates(_temps, cb) {
+  async function injectTemplates(_temps, cb) {
     var target;
 
     _.log('Starting Load Templates');
-    loadTemplates(_temps, function (templates) {
+    await loadTemplates(_temps, async function (templates) {
       _.log('Injecting Templates');
 
       // No Templates?
       if (!templates || typeof templates !== 'object') {
         _.log('No Templates loaded?');
         if (typeof cb === 'function') {
-          cb();
+          await cb();
         }
         return;
       }
@@ -102,7 +102,7 @@ var PlayMidnightInjector = (function (_, PM) {
       }
 
       if (typeof cb === 'function') {
-        cb();
+        await cb();
       }
     });
   }
